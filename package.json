@@ -1,0 +1,71 @@
+{
+  "name": "dsh-qq-persona",
+  "version": "0.1.0",
+  "private": true,
+  "description": "QQ 人设聊天插件：让 AI 以自定义人设、性格、说话风格接管 QQ 聊天（DeepSeek Harness 插件）",
+  "type": "module",
+  "main": "./index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Trivial-Ideal580/dsh-qq-persona.git"
+  },
+  "homepage": "https://github.com/Trivial-Ideal580/dsh-qq-persona#readme",
+  "bugs": {
+    "url": "https://github.com/Trivial-Ideal580/dsh-qq-persona/issues"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "exports": {
+    ".": "./index.js"
+  },
+  "files": [
+    "index.js",
+    "src",
+    "personas",
+    "cordis.patch.yml",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "node --test --test-isolation=none test/yaml.test.js test/prompt.test.js test/style.test.js test/trigger.test.js test/yaml-write.test.js test/session-route.test.js test/session-conflict.test.js test/media.test.js test/settings.test.js test/history.test.js test/gateway-body.test.js test/imagegen.test.js test/instance-lock.test.js test/processes.test.js test/vision-test.test.js",
+    "smoke": "node scripts/smoke.mjs",
+    "smoke:studio": "node scripts/studio-smoke.mjs",
+    "smoke:ui": "node scripts/ui-save-smoke.mjs --port 7794",
+    "smoke:bot": "node scripts/bot-smoke.mjs",
+    "studio": "node studio/server.mjs --open",
+    "prompt": "node scripts/smoke.mjs --print-prompt",
+    "dev-link": "node scripts/dev-link.mjs",
+    "install-profile": "node scripts/install.mjs"
+  },
+  "keywords": [
+    "deepseek-harness",
+    "dsh",
+    "qqbot",
+    "persona",
+    "cordis",
+    "plugin"
+  ],
+  "license": "MIT",
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "dependencies": {
+    "@tencent-connect/qqbot-nodejs": "^1.0.4"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": ">=4.0.1",
+    "@deepseek-ai/dsh-agent": ">=0.1.0-rc.6",
+    "@deepseek-ai/dsh-llm": ">=0.1.0-rc.6",
+    "@deepseek-ai/dsh-session": ">=0.1.0-rc.6",
+    "@deepseek-ai/schemastery": ">=3.18.1"
+  },
+  "peerDependenciesMeta": {
+    "@deepseek-ai/cordis": { "optional": false },
+    "@deepseek-ai/dsh-agent": { "optional": false },
+    "@deepseek-ai/dsh-llm": { "optional": false },
+    "@deepseek-ai/dsh-session": { "optional": false },
+    "@deepseek-ai/schemastery": { "optional": false }
+  }
+}

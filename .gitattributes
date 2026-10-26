@@ -1,0 +1,11 @@
+# 源码统一用 LF；Windows 批处理必须原样保留 CRLF（不能规范化，否则 cmd 解析会错乱）
+* text=auto eol=lf
+
+# -text：完全不做换行转换，blob 里就是 CRLF
+*.cmd -text
+*.ps1 -text
+
+*.png binary
+*.jpg binary
+*.ico binary
+*.zip binary

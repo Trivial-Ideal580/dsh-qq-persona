@@ -1,0 +1,83 @@
+# dsh-qq-persona bundle patch
+#
+# 由 `dsh plugin --profile <name> add <本目录>` 安装后，dsh 启动时自动叠加此层。
+# 叠加顺序：dsh-base → 本 bundle patch → profile 的 cordis.patch.yml → --patch
+#
+# 凭据优先级：本文件 config → 环境变量 QQBOT_APPID / QQBOT_SECRET
+#
+# 注意：QQ 官方机器人同一个 AppID 只能有一个网关连接。
+# 若 profile 里还装了 @tencent-connect/dsh-qqbot，请只保留其中一个。
+
+- insert:
+    - id: im-qq-persona
+      name: 'dsh-qq-persona'
+      config:
+        appId: __FROM_ENV__
+        appSecret: __FROM_ENV__
+
+        # ── 人设 ──
+        personaId: linfi
+        personasDir: ''
+        # 是否允许模型使用工具。人设聊天建议 false（防止陌生人通过聊天触发工具）。
+        toolsEnabled: false
+
+        # ── 说话风格全局覆盖（0 / -1 表示沿用各人设自己的设置）──
+        style:
+          maxBubbles: 0
+          maxCharsPerBubble: 0
+          emojiRate: -1
+          typingBaseMs: 600
+          typingPerCharMs: 30
+          maxTypingMs: 4000
+          simulateTyping: true
+
+        # ── 什么时候接话 ──
+        trigger:
+          requireMention: true      # 群聊里必须 @ 它
+          keywords: []              # 命中这些词也会接（如 ["林绯", "小夏"]）
+          randomChance: 0           # 群聊随机插话概率 0~1
+          cooldownSec: 20           # 同一个群里两次回复的最小间隔
+          activeWindowMin: 30       # 群聊冷场超过这么久就不再随机插话
+          historyLimit: 20          # 群聊上下文最多记多少条（不只 @ 它的）
+          historyTtlMin: 30         # 群聊上下文保留多少分钟
+
+        # ── 谁能聊天 ──
+        access:
+          c2cMode: open
+          c2cAllow: []
+          groupMode: open
+          groupAllow: []
+
+        # ── 管理指令 ──
+        commands:
+          enabled: true
+          admins: []                # 群聊里可以用 /persona 的人 openid；留空则只允许私聊
+
+        # ── 多模态 ──
+        # 图片交给 OpenAI 兼容的视觉模型描述；不填 apiKey 就退化成“[图片]”。
+        # 语音直接用 QQ 平台给的转写文字；文本文件（txt/md/json…）直接读内容。
+        vision:
+          enabled: true
+          baseUrl: https://api.openai.com/v1
+          apiKey: ''
+          model: gpt-4o-mini
+          maxChars: 300
+        media:
+          readTextFiles: true
+          maxTextFileBytes: 65536
+
+        # ── 画图 ──
+        # 配了 apiKey 才会给模型“发图”能力；它用 [[IMAGE: ...]] 发起。
+        imagegen:
+          enabled: true
+          baseUrl: https://api.openai.com/v1
+          apiKey: ''
+          model: gpt-image-1
+          size: 1024x1024
+        # 群聊回复方式：auto = 先发主动消息（不带引用/@），被拒再回退被动回复
+        groupReplyMode: auto
+
+        sessionIdleTimeout: 1800000
+        maxQueue: 20
+        processingTimeoutMs: 120000
+        debug: false
