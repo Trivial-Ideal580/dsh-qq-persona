@@ -1,0 +1,486 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>QQ 人设工作台</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <div class="app">
+      <header class="topbar">
+        <div class="brand">
+          <div class="logo">Q</div>
+          <div>
+            <h1>QQ 人设工作台</h1>
+            <p id="profile-line" class="muted">正在读取 profile…</p>
+          </div>
+        </div>
+
+        <div class="status-wrap">
+          <span id="status-dot" class="dot"></span>
+          <div class="status-text">
+            <strong id="status-text">已停止</strong>
+            <span id="status-sub" class="muted">点右边启动</span>
+          </div>
+        </div>
+
+        <div class="top-actions">
+          <button id="btn-start" class="btn primary">启动机器人</button>
+          <button id="btn-stop" class="btn">停止</button>
+          <button id="btn-restart" class="btn ghost">重启</button>
+          <button id="btn-cleanup" class="btn ghost" title="结束同一 profile 的残留机器人进程">清理残留</button>
+        </div>
+      </header>
+
+      <nav class="tabs">
+        <button class="tab active" data-tab="dashboard">控制台</button>
+        <button class="tab" data-tab="personas">人设</button>
+        <button class="tab" data-tab="settings">设置</button>
+      </nav>
+
+      <main>
+        <!-- ── 控制台 ─────────────────────────────────── -->
+        <section id="tab-dashboard" class="view active">
+          <div class="stat-grid">
+            <div class="stat card">
+              <span class="stat-label">运行状态</span>
+              <strong id="stat-phase" class="stat-value">已停止</strong>
+              <span id="stat-pid" class="muted small">—</span>
+            </div>
+            <div class="stat card">
+              <span class="stat-label">运行时长</span>
+              <strong id="stat-uptime" class="stat-value">0s</strong>
+              <span class="muted small">关闭窗口会一起停止</span>
+            </div>
+            <div class="stat card">
+              <span class="stat-label">默认人设</span>
+              <strong id="stat-persona" class="stat-value">—</strong>
+              <span id="stat-persona-sub" class="muted small">—</span>
+            </div>
+            <div class="stat card">
+              <span class="stat-label">人设数量</span>
+              <strong id="stat-count" class="stat-value">0</strong>
+              <span class="muted small">内置 + 自定义</span>
+            </div>
+          </div>
+
+          <div id="setup-card" class="card notice hidden">
+            <div class="notice-title">还差两步就能跑起来</div>
+            <ul id="setup-list" class="setup-list"></ul>
+          </div>
+
+          <div class="card log-card">
+            <div class="card-head">
+              <div>
+                <h2>运行日志</h2>
+                <p class="muted small">dsh 的输出会实时出现在这里</p>
+              </div>
+              <div class="row gap">
+                <label class="check small"><input id="log-autoscroll" type="checkbox" checked /> 自动滚动</label>
+                <button id="btn-clear-log" class="btn small ghost">清空</button>
+              </div>
+            </div>
+            <pre id="log" class="log"></pre>
+          </div>
+        </section>
+
+        <!-- ── 人设 ───────────────────────────────────── -->
+        <section id="tab-personas" class="view">
+          <div class="persona-layout">
+            <aside class="card persona-side">
+              <div class="card-head compact">
+                <h2>人设</h2>
+                <button id="btn-new-persona" class="btn small primary">＋ 新建</button>
+              </div>
+              <input id="persona-search" class="input small" type="search" placeholder="搜索名字或 id" />
+              <div id="persona-list" class="persona-list"></div>
+              <p class="muted tiny">改完点“保存”，再回控制台点“重启”生效。</p>
+            </aside>
+
+            <section class="card persona-editor">
+              <div class="card-head">
+                <div>
+                  <h2 id="editor-title">新建人设</h2>
+                  <p id="editor-sub" class="muted small">从身份、性格到口癖，写成一个具体的人</p>
+                </div>
+                <div class="row gap wrap">
+                  <button id="btn-preview" class="btn small">预览 prompt</button>
+                  <button id="btn-raw" class="btn small ghost">看 YAML</button>
+                  <button id="btn-default" class="btn small ghost">设为默认</button>
+                  <button id="btn-delete" class="btn small danger ghost">删除</button>
+                </div>
+              </div>
+
+              <div class="form">
+                <fieldset>
+                  <legend>基本</legend>
+                  <div class="grid-2">
+                    <label class="field">
+                      <span>id <em>可留空，会自动用名字；保存后不可改</em></span>
+                      <input id="f-id" class="input" placeholder="留空自动用名字，例如 linfi" />
+                    </label>
+                    <label class="field">
+                      <span>名字</span>
+                      <input id="f-name" class="input" placeholder="例如 林绯" />
+                    </label>
+                  </div>
+                  <label class="field">
+                    <span>身份 <em>一句话：年龄、职业、在哪</em></span>
+                    <input id="f-identity" class="input" placeholder="24 岁，在杭州做独立游戏美术，接外包为生" />
+                  </label>
+                  <label class="field">
+                    <span>和对方的关系</span>
+                    <input id="f-relationship" class="input" placeholder="网上认识两年多的朋友，见过一次面" />
+                  </label>
+                  <label class="field">
+                    <span>经历 / 生活细节 <em>模型会从这里取材</em></span>
+                    <textarea id="f-background" class="input" rows="4" placeholder="养了一只猫，凌晨还在赶稿…"></textarea>
+                  </label>
+                </fieldset>
+
+                <fieldset>
+                  <legend>性格</legend>
+                  <label class="field">
+                    <span>性格标签 <em>回车添加，3~6 个，留点缺点</em></span>
+                    <div id="f-personality" class="chips" data-chips></div>
+                  </label>
+                  <label class="field">
+                    <span>性格细节</span>
+                    <textarea id="f-personalityDetail" class="input" rows="3" placeholder="表面冷淡，其实很在意别人怎么看…"></textarea>
+                  </label>
+                </fieldset>
+
+                <fieldset>
+                  <legend>说话方式</legend>
+                  <label class="field">
+                    <span>语气</span>
+                    <input id="f-tone" class="input" placeholder="随口的、有点懒的语气，像深夜发微信" />
+                  </label>
+                  <div class="grid-3">
+                    <label class="field">
+                      <span>句子长度</span>
+                      <select id="f-length" class="input">
+                        <option value="short">短句（≤15 字/条）</option>
+                        <option value="medium">中等（≤30 字/条）</option>
+                        <option value="long">长句（≤60 字/条）</option>
+                      </select>
+                    </label>
+                    <label class="field">
+                      <span>句式习惯</span>
+                      <input id="f-sentence" class="input" placeholder="多用短句，一句一行" />
+                    </label>
+                    <label class="field">
+                      <span>标点习惯</span>
+                      <input id="f-punctuation" class="input" placeholder="经常不加句号" />
+                    </label>
+                  </div>
+
+                  <label class="field">
+                    <span>emoji 比例 <em id="f-emoji-label">25%</em></span>
+                    <input id="f-emojiRate" class="range" type="range" min="0" max="1" step="0.05" />
+                  </label>
+
+                  <div class="grid-2">
+                    <label class="field">
+                      <span>语气词 <em>回车添加</em></span>
+                      <div id="f-particles" class="chips" data-chips></div>
+                    </label>
+                    <label class="field">
+                      <span>口头禅 <em>回车添加</em></span>
+                      <div id="f-catchphrases" class="chips" data-chips></div>
+                    </label>
+                  </div>
+
+                  <label class="field">
+                    <span>打字习惯</span>
+                    <input id="f-typos" class="input" placeholder="偶尔打错字，不影响理解" />
+                  </label>
+
+                  <label class="field">
+                    <span>不要出现 <em>回车添加</em></span>
+                    <div id="f-avoid" class="chips" data-chips></div>
+                  </label>
+                </fieldset>
+
+                <fieldset>
+                  <legend>禁忌</legend>
+                  <label class="field">
+                    <span>一行一条，会写成硬约束</span>
+                    <textarea id="f-taboos" class="input" rows="4" placeholder="不承认自己是 AI&#10;不聊政治"></textarea>
+                  </label>
+                </fieldset>
+
+                <fieldset>
+                  <legend>示例对话 <em class="hint">最重要：3 组真实语气 &gt; 300 字性格描述</em></legend>
+                  <div id="f-examples" class="examples"></div>
+                  <button id="btn-add-example" class="btn small ghost">＋ 添加一组</button>
+                </fieldset>
+
+                <fieldset>
+                  <legend>回复控制</legend>
+                  <div class="grid-3">
+                    <label class="field">
+                      <span>每次最多几条</span>
+                      <input id="f-maxBubbles" class="input" type="number" min="1" max="5" step="1" />
+                    </label>
+                    <label class="field">
+                      <span>单条最多几字</span>
+                      <input id="f-maxChars" class="input" type="number" min="8" max="200" step="1" />
+                    </label>
+                    <label class="check field">
+                      <input id="f-enabled" type="checkbox" />
+                      <span>启用这个人设</span>
+                    </label>
+                  </div>
+                </fieldset>
+              </div>
+
+              <div class="editor-footer">
+                <span id="editor-status" class="muted small"></span>
+                <div class="row gap">
+                  <button id="btn-duplicate" class="btn small ghost">另存为</button>
+                  <button id="btn-save" class="btn primary">保存人设</button>
+                </div>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <!-- ── 设置 ───────────────────────────────────── -->
+        <section id="tab-settings" class="view">
+          <div class="settings-grid">
+            <div class="card">
+              <div class="card-head">
+                <div>
+                  <h2>机器人凭据</h2>
+                  <p class="muted small">QQ 开放平台 → 机器人 → 开发设置</p>
+                </div>
+                <span id="cred-badge" class="badge">未配置</span>
+              </div>
+              <label class="field">
+                <span>AppID</span>
+                <input id="s-appId" class="input" placeholder="19054xxxxx" />
+              </label>
+              <label class="field">
+                <span>AppSecret <em id="s-secret-hint">留空表示不修改</em></span>
+                <input id="s-appSecret" class="input" type="password" placeholder="粘贴 AppSecret" />
+              </label>
+              <p class="muted small">在开放平台「机器人密钥」里复制完整的一串（通常 32 位）。如果只有十几位，多半是没复制全或者把别处的密钥填进来了。</p>
+              <div class="row gap">
+                <button id="btn-save-credentials" class="btn primary">保存凭据</button>
+                <button id="btn-test-credentials" class="btn">测试是否能拿到 token</button>
+              </div>
+              <p class="muted small">“测试”会直接请求一次 QQ 开放平台：不通过就说明 AppID 和 AppSecret 不配套，机器人不可能上线。</p>
+            </div>
+
+            <div class="card">
+              <div class="card-head">
+                <div>
+                  <h2>默认人设</h2>
+                  <p class="muted small">新会话默认用哪个人设</p>
+                </div>
+              </div>
+              <label class="field">
+                <span>人设</span>
+                <select id="s-personaId" class="input"></select>
+              </label>
+              <p class="muted small">单个聊天里可以用 <code>/persona use &lt;id&gt;</code> 单独切换。</p>
+            </div>
+
+            <div class="card">
+              <div class="card-head">
+                <div>
+                  <h2>群聊接话</h2>
+                  <p class="muted small">决定它什么时候开口</p>
+                </div>
+              </div>
+              <label class="check">
+                <input id="s-requireMention" type="checkbox" />
+                <span>群里必须 @ 它才回复</span>
+              </label>
+              <label class="field">
+                <span>唤醒词 <em>回车添加，命中也会接话</em></span>
+                <div id="s-keywords" class="chips" data-chips></div>
+              </label>
+              <label class="field">
+                <span>随机插话概率 <em id="s-random-label">0%</em></span>
+                <input id="s-randomChance" class="range" type="range" min="0" max="0.5" step="0.01" />
+              </label>
+              <div class="grid-2">
+                <label class="field">
+                  <span>同群冷却（秒）</span>
+                  <input id="s-cooldownSec" class="input" type="number" min="0" max="600" />
+                </label>
+                <label class="field">
+                  <span>冷场多少分钟后不插话</span>
+                  <input id="s-activeWindowMin" class="input" type="number" min="1" max="720" />
+                </label>
+              </div>
+              <div class="grid-2">
+                <label class="field">
+                  <span>群聊上下文最多几条 <em>不只 @ 它的</em></span>
+                  <input id="s-historyLimit" class="input" type="number" min="1" max="200" />
+                </label>
+                <label class="field">
+                  <span>上下文保留多少分钟</span>
+                  <input id="s-historyTtlMin" class="input" type="number" min="1" max="1440" />
+                </label>
+              </div>
+              <p class="muted small">群里所有消息都会记下来，等它接话时一起交给模型；接完清空，不重复。</p>
+              <details class="hint-box">
+                <summary>收不到没 @ 它的群消息？</summary>
+                <div>
+                  <p>这是 QQ 平台设置，不在插件里，也不在开放平台后台：</p>
+                  <ol>
+                    <li>让<b>群主</b>在手机 QQ 打开这个群 → 右上角「群设置」</li>
+                    <li>找到「群机器人 / 机器人管理」→ 选中这个机器人</li>
+                    <li>把「机器人可获取的群聊消息范围」改成「获取群内全部消息」</li>
+                  </ol>
+                  <p>只有群主能改，而且<b>每个群都要单独设置</b>。设好后日志里会出现 <code>群消息模式：全量（GROUP_MESSAGE_CREATE）</code>。</p>
+                </div>
+              </details>
+            </div>
+
+            <div class="card">
+              <div class="card-head">
+                <div>
+                  <h2>说话风格覆盖</h2>
+                  <p class="muted small">0 / -1 表示跟随人设自己的设置</p>
+                </div>
+              </div>
+              <div class="grid-3">
+                <label class="field">
+                  <span>最多几条</span>
+                  <input id="s-maxBubbles" class="input" type="number" min="0" max="5" />
+                </label>
+                <label class="field">
+                  <span>单条最多几字</span>
+                  <input id="s-maxChars" class="input" type="number" min="0" max="200" />
+                </label>
+                <label class="field">
+                  <span>emoji 比例</span>
+                  <input id="s-emojiRate" class="input" type="number" min="-1" max="1" step="0.05" />
+                </label>
+              </div>
+              <div class="grid-3">
+                <label class="field">
+                  <span>基础停顿（ms）</span>
+                  <input id="s-typingBaseMs" class="input" type="number" min="0" max="5000" />
+                </label>
+                <label class="field">
+                  <span>每字追加（ms）</span>
+                  <input id="s-typingPerCharMs" class="input" type="number" min="0" max="200" />
+                </label>
+                <label class="field">
+                  <span>停顿上限（ms）</span>
+                  <input id="s-maxTypingMs" class="input" type="number" min="0" max="20000" />
+                </label>
+              </div>
+              <label class="check">
+                <input id="s-simulateTyping" type="checkbox" />
+                <span>模拟真人打字停顿</span>
+              </label>
+            </div>
+
+            <div class="card wide">
+              <div class="card-head">
+                <div>
+                  <h2>多模态</h2>
+                  <p class="muted small">图片交给视觉模型描述 · 语音用平台转写 · 文本文件直接读</p>
+                </div>
+                <span id="vision-badge" class="badge">未配置</span>
+              </div>
+              <label class="check">
+                <input id="s-visionEnabled" type="checkbox" />
+                <span>识别图片内容</span>
+              </label>
+              <label class="field">
+                <span>视觉模型地址 <em>OpenAI 兼容</em></span>
+                <input id="s-visionBaseUrl" class="input" placeholder="https://api.openai.com/v1" />
+              </label>
+              <div class="grid-2">
+                <label class="field">
+                  <span>模型名</span>
+                  <input id="s-visionModel" class="input" placeholder="gpt-4o-mini" />
+                </label>
+                <label class="field">
+                  <span>API Key <em id="s-vision-key-hint">留空表示不修改</em></span>
+                  <input id="s-visionApiKey" class="input" type="password" placeholder="sk-..." />
+                </label>
+              </div>
+              <div class="row gap">
+                <button id="btn-test-vision" class="btn small">测试视觉模型</button>
+                <span class="muted small">用一张 1×1 的图真打一次接口，401/404/模型名错都会直接显示</span>
+              </div>
+              <label class="check">
+                <input id="s-readTextFiles" type="checkbox" />
+                <span>文本文件（txt/md/json/csv…）直接读内容</span>
+              </label>
+              <p class="muted small">不配 Key 也能用，只是图片会变成“[图片]”，模型会说自己看不到。</p>
+              <p class="muted small">常用：智谱 <code>https://open.bigmodel.cn/api/paas/v4</code> + <code>glm-4v-flash</code>（免费）；OpenAI <code>gpt-4o-mini</code>。注意 DeepSeek 的模型不能看图。</p>
+            </div>
+
+            <div class="card wide">
+              <div class="card-head">
+                <div>
+                  <h2>画图</h2>
+                  <p class="muted small">它想发图时会生成并发送 · 也可以用 /draw 指定画面</p>
+                </div>
+                <span id="image-badge" class="badge">未配置</span>
+              </div>
+              <label class="check">
+                <input id="s-imageEnabled" type="checkbox" />
+                <span>允许它发图片</span>
+              </label>
+              <label class="field">
+                <span>画图地址 <em>OpenAI 兼容</em></span>
+                <input id="s-imageBaseUrl" class="input" placeholder="https://api.openai.com/v1" />
+              </label>
+              <div class="grid-3">
+                <label class="field">
+                  <span>模型名</span>
+                  <input id="s-imageModel" class="input" placeholder="gpt-image-1" />
+                </label>
+                <label class="field">
+                  <span>尺寸</span>
+                  <input id="s-imageSize" class="input" placeholder="1024x1024" />
+                </label>
+                <label class="field">
+                  <span>API Key <em id="s-image-key-hint">留空表示不修改</em></span>
+                  <input id="s-imageApiKey" class="input" type="password" placeholder="sk-..." />
+                </label>
+              </div>
+              <p class="muted small">没配 Key 时模型不会收到画图指令；配好后它会在想发图时输出 [[IMAGE: 画面描述]]，由插件生成并发送。</p>
+            </div>
+          </div>
+
+          <div class="settings-actions card">
+            <div>
+              <strong>保存设置</strong>
+              <p class="muted small">设置保存在 ~/.dsh/qq-persona/settings.json，机器人重启后生效</p>
+            </div>
+            <div class="row gap">
+              <button id="btn-save-settings" class="btn">只保存</button>
+              <button id="btn-save-restart" class="btn primary">保存并重启机器人</button>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <div id="modal" class="modal hidden">
+      <div class="modal-card">
+        <div class="card-head">
+          <h2 id="modal-title">预览</h2>
+          <button id="modal-close" class="btn small ghost">关闭</button>
+        </div>
+        <pre id="modal-body" class="modal-body"></pre>
+      </div>
+    </div>
+
+    <div id="toast" class="toast hidden"></div>
+
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>
